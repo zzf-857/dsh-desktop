@@ -1,5 +1,6 @@
 /** Public fork metadata is embedded by the fork packager, never read from user state. */
 import { readFileSync } from 'node:fs'
+import type { ProfileManifest } from '@deepseek-ai/dsh-app-boot'
 
 export interface ForkDistribution {
   readonly repository: string
@@ -26,4 +27,26 @@ export function parseForkDistribution(manifest: unknown): ForkDistribution | und
 /** No local account, profile, settings, or credential files participate in this read. */
 export function desktopForkDistribution(): ForkDistribution | undefined {
   return parseForkDistribution(JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')))
+}
+
+/** One-time registration also repairs the base-only profile created by the 2.0.15 launcher. */
+export function seedForkProfile<T extends ProfileManifest>(
+  manifest: T,
+  distribution: ForkDistribution | undefined = desktopForkDistribution(),
+): T {
+  const metadata = manifest as T & { dshDesktopForkPluginsInitialized?: unknown }
+  if (distribution === undefined || metadata.dshDesktopForkPluginsInitialized === true) return manifest
+  const current = manifest.dsh?.profile?.bundles ?? []
+  const deselected = (manifest.dsh as { desktopDeselectedBundles?: unknown } | undefined)?.desktopDeselectedBundles ?? []
+  if (!Array.isArray(current) || current.some(name => typeof name !== 'string')
+    || !Array.isArray(deselected) || deselected.some(name => typeof name !== 'string')) {
+    throw new Error('Invalid Desktop profile plugin list; refusing to overwrite it')
+  }
+  const excluded = new Set(deselected as string[])
+  const bundles = [...new Set([...current, ...distribution.bundledPlugins.filter(name => !excluded.has(name))])]
+  return {
+    ...manifest,
+    dshDesktopForkPluginsInitialized: true,
+    dsh: { ...manifest.dsh, profile: { ...manifest.dsh?.profile, bundles } },
+  }
 }

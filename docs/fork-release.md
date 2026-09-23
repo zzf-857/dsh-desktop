@@ -33,8 +33,12 @@ offline. Nothing is copied from the private profile's package directory.
 | dshmarket | 1.55.0 |
 | open-sea-skin | 1.2.3 |
 
-A new Desktop profile is seeded with these bundle names. Existing profiles and their
-enable/disable choices are preserved. DSH Market remains subject to the existing marketplace
+Version 2.0.15 contained the plugin code but could skip registration because the launcher
+materialized the base profile before profile preparation. Version 2.0.16 registers the bundled
+plugin names once during Desktop profile preparation, including already-created 2.0.15 profiles.
+The profile manifest records `dshDesktopForkPluginsInitialized: true`. Existing dependency
+versions, explicit deselections, and removals after this migration are preserved. Safe-mode and
+custom profiles are not automatically seeded. DSH Market remains subject to the existing marketplace
 selection in Desktop settings. WorkBuddy uses the Desktop profile's 0.5.4 version; the older
 copy in the separate local Web profile is not duplicated in this installer.
 API keys, logins, remote service endpoints and personalized plugin settings must be configured

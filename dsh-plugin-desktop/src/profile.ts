@@ -1,7 +1,7 @@
 /** Compatibility profile composition over the official Web bundle and user plugins. */
 
 import { createRequire } from 'node:module'
-import { desktopForkDistribution } from './fork-distribution.ts'
+import { seedForkProfile } from './fork-distribution.ts'
 import {
   existsSync,
   readFileSync,
@@ -344,9 +344,10 @@ function sameList(left: readonly string[], right: readonly string[]): boolean {
 export function ensureDesktopProfile(home: string = resolveDshHome()): string {
   const dir = resolveProfileDir(DESKTOP_PROFILE_NAME, home)
   if (!existsSync(join(dir, 'package.json'))) {
-    initProfile(dir, [...REQUIRED_BUNDLES, ...(desktopForkDistribution()?.bundledPlugins ?? [])], requiredWebPatchReload())
+    initProfile(dir, REQUIRED_BUNDLES, requiredWebPatchReload())
   }
-  const manifest = readProfileManifest(BIN_NAME, dir)
+  const previousManifest = readProfileManifest(BIN_NAME, dir)
+  const manifest = seedForkProfile(previousManifest)
   const rawBundles = (manifest.dsh?.profile as { bundles?: unknown } | undefined)?.bundles
   if (rawBundles !== undefined
     && (!Array.isArray(rawBundles) || rawBundles.some(value => typeof value !== 'string'))) {
@@ -355,7 +356,7 @@ export function ensureDesktopProfile(home: string = resolveDshHome()): string {
   const current = rawBundles === undefined ? [] : rawBundles as string[]
   const bundles = desktopBundleList(current)
   const patchReload = requiredWebPatchReload()
-  if (!sameList(current, bundles) || manifest.dsh?.profile?.patchReload !== patchReload) {
+  if (manifest !== previousManifest || !sameList(current, bundles) || manifest.dsh?.profile?.patchReload !== patchReload) {
     writeProfileManifest(dir, {
       ...manifest,
       dsh: {
