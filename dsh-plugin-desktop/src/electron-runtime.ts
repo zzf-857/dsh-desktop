@@ -10,6 +10,8 @@ import {
 } from 'electron'
 import { spawn } from 'node:child_process'
 import { RemoteControlOffer, remoteControlOfferCopy } from './remote-control-offer.ts'
+import { isRepositoryLocalMode } from './repository-local-data.ts'
+import { desktopForkDistribution } from './fork-distribution.ts'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { Readable } from 'node:stream'
@@ -223,8 +225,8 @@ export class ElectronDesktopRuntime implements DesktopRuntime {
       ...(workspaceVolumeQuery === undefined ? {} : { volumeQuery: workspaceVolumeQuery }),
     })
     this.updates = {
-      get isPackaged() { return app.isPackaged },
-      get canDownload() { return app.isPackaged && platformStrategy.updateDownloadPlatform !== undefined },
+      get isPackaged() { return app.isPackaged && !isRepositoryLocalMode() && desktopForkDistribution() === undefined },
+      get canDownload() { return app.isPackaged && !isRepositoryLocalMode() && desktopForkDistribution() === undefined && platformStrategy.updateDownloadPlatform !== undefined },
       get currentVersion() { return PRODUCT_VERSION },
       get releaseChannel() { return DESKTOP_RELEASE_CHANNEL },
       get statePath() { return join(app.getPath('userData'), 'updates', 'state.json') },

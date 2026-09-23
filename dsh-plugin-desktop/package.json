@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-desktop",
-  "version": "2.0.14",
+  "version": "2.0.15",
   "description": "DSH Desktop: an Electron shell composed as a DeepSeek Harness Cordis plugin",
   "desktopName": "dsh-desktop.desktop",
   "license": "MIT",
@@ -144,7 +144,9 @@
     "icons:export": "node ../scripts/export-app-icons.mjs --channel stable"
   },
   "dependencies": {
-    "@agents-anywhere/dsh-bridge-next": "file:../vendor/agents-anywhere/agents-anywhere-dsh-bridge-next-0.1.0-dev.0.desktop.ca022d9286dd0.rc4b2a1d2.tgz",
+    "@agents-anywhere/dsh-bridge-next": "patch:@agents-anywhere/dsh-bridge-next@file%3A../vendor/agents-anywhere/agents-anywhere-dsh-bridge-next-0.1.0-dev.0.desktop.ca022d9286dd0.rc4b2a1d2.tgz%23../vendor/agents-anywhere/agents-anywhere-dsh-bridge-next-0.1.0-dev.0.desktop.ca022d9286dd0.rc4b2a1d2.tgz%3A%3Ahash=f41e7e&locator=dsh-plugin-desktop-beta%2540workspace%253Adsh-plugin-desktop-beta#~/patches/agents-anywhere-dialogs@ca022d9286dd.patch",
+    "@agentscope-ai/reme-dsh-plugin": "0.1.0",
+    "@changfenhuang/dsh-genui": "0.11.0",
     "@deepseek-ai/cordis": "4.0.2",
     "@deepseek-ai/cordis-plugin-group": "1.0.2",
     "@deepseek-ai/cordis-plugin-include": "1.0.7",
@@ -221,6 +223,7 @@
     "@deepseek-ai/dsh-launch-environment": "0.1.5-rc.2",
     "@deepseek-ai/dsh-llm": "0.1.5-rc.2",
     "@deepseek-ai/dsh-llm-deepseek": "0.1.5-rc.2",
+    "@deepseek-ai/dsh-llm-pi-ai": "0.1.5-rc.2",
     "@deepseek-ai/dsh-llm-retry": "0.1.5-rc.2",
     "@deepseek-ai/dsh-mcp-client": "0.1.5-rc.2",
     "@deepseek-ai/dsh-message-feedback": "0.1.5-rc.2",
@@ -286,12 +289,19 @@
     "@deepseek-ai/dsh-workflow": "0.1.5-rc.2",
     "@deepseek-ai/dsh-workspace": "0.1.5-rc.2",
     "@deepseek-ai/schemastery": "^3.18.2",
+    "@earendil-works/pi-ai": "^0.85.1",
+    "@linxin666/dsh-client-ui-git-graph": "0.3.24",
     "adm-zip": "^0.6.0",
+    "dsh-better-sidebar": "0.19.1",
     "dsh-community-market": "0.1.0-dev.0",
-    "dshmarket": "1.38.1",
+    "dsh-context": "0.54.4",
+    "dsh-diff-approval": "0.28.0",
+    "dsh-workbuddy-connect": "0.5.4",
+    "dshmarket": "1.55.0",
     "fs-ext": "2.1.1",
     "koffi": "3.1.5",
     "node-addon-require-builtin": "^0.1.4",
+    "open-sea-skin": "1.2.3",
     "pnpm": "11.8.0",
     "react": "18.3.1",
     "selfsigned": "5.5.0",
@@ -364,7 +374,9 @@
       "lib/**",
       "package.json",
       "!node_modules/node-pty/build/**",
-      "!node_modules/fs-ext/build/**"
+      "!node_modules/fs-ext/build/**",
+      "licenses/**",
+      "THIRD_PARTY_NOTICES.md"
     ],
     "mac": {
       "target": [

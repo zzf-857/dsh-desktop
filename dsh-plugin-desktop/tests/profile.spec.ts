@@ -549,7 +549,7 @@ virtualStoreDirMaxLength: 60
     expect(selected?.packageDir).not.toBe(oldProfileMarketDir)
     expect(JSON.parse(readFileSync(join(selected!.packageDir, 'package.json'), 'utf8'))).toMatchObject({
       name: 'dshmarket',
-      version: '1.38.1',
+      version: '1.55.0',
     })
   })
 

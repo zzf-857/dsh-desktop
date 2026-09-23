@@ -4,6 +4,8 @@
 
 <h1 align="center">DSH Desktop</h1>
 
+> **本地 fork 使用方式**：本项目的 Windows 程序固定为 `exe/DSH Desktop.exe`。用户数据、迁移备份和旧版配套文件位于 `.local-data/`；这两个目录已被 Git 忽略，禁止强制提交或上传。从仓库根目录执行 `corepack yarn package:local` 即可重新打包、保留旧程序备份并原地升级；仅打包时追加 `-NoLaunch`。详细约定见 [AGENTS.md](AGENTS.md)。
+
 <p align="center">
   <strong>基于 DeepSeek Harness 构建的 Windows 和 macOS 开源桌面客户端。</strong>
 </p>

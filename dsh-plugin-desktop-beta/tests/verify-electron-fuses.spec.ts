@@ -46,6 +46,14 @@ function fuseWire(overrides: Partial<Record<FuseV1Options, FuseState>> = {}): Fu
 }
 
 describe('final Electron fuse verification', () => {
+  it('verifies host directory builds when electron-builder omits all artifact targets', () => {
+    const built = result([{ key: 'win', archs: [] }])
+    const contexts = resolveFinalPackagedRuntimeContexts(built, () => true)
+    expect(contexts).toHaveLength(1)
+    expect(contexts[0]?.arch).toBe(Arch[process.arch as keyof typeof Arch])
+    expect(contexts[0]?.electronPlatformName).toBe('win32')
+  })
+
   it('maps only requested platform and architecture keys to complete runtime contexts', () => {
     const expected = [
       join('/build', 'linux-unpacked', 'dsh-plugin-desktop-beta'),
@@ -171,7 +179,7 @@ describe('final Electron fuse verification', () => {
     expect(() => resolveFinalPackagedRuntimeContexts(
       result([{ key: 'win', archs: [Arch.x64, Arch.arm64] }]),
       filename => filename === x64Executable,
-    )).toThrow('win/arm64 at /build/win-arm64-unpacked/DSH Desktop Beta.exe')
+    )).toThrow(`win/arm64 at ${join('/build', 'win-arm64-unpacked', 'DSH Desktop Beta.exe')}`)
   })
 
   it('resolves a real target-name map through the target archs retained by NSIS', () => {

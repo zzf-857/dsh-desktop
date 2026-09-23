@@ -196,7 +196,7 @@ describe('published package surface', () => {
   it('pins both selectable Market providers in the published runtime', () => {
     expect(manifest.dependencies).toMatchObject({
       'dsh-community-market': '0.1.0-dev.0',
-      dshmarket: '1.38.1',
+      dshmarket: '1.55.0',
     })
     expect(manifest.optionalDependencies ?? {}).not.toHaveProperty('dshmarket')
   })
@@ -775,7 +775,7 @@ describe('published package surface', () => {
 
   it('fixes the installed application identity', () => {
     expect(workspaceManifest.version).toBeUndefined()
-    expect(manifest.version).toBe('2.0.14')
+    expect(manifest.version).toBe('2.0.15')
     expect(manifest.build?.productName).toBe('DSH Desktop')
     expect(manifest.build?.appId).toBe('ai.deepseek.dsh.desktop')
     expect(manifest.build?.asar).toBe(false)
@@ -810,6 +810,8 @@ describe('published package surface', () => {
       'package.json',
       '!node_modules/node-pty/build/**',
       '!node_modules/fs-ext/build/**',
+      'licenses/**',
+      'THIRD_PARTY_NOTICES.md',
     ])
     expect(manifest.build?.mac?.icon).toBe('build/app-icon.icon')
     expect(manifest.build?.dmg?.icon).toBe('build/app-icon.icns')

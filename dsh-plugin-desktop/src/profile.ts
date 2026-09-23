@@ -1,6 +1,7 @@
 /** Compatibility profile composition over the official Web bundle and user plugins. */
 
 import { createRequire } from 'node:module'
+import { desktopForkDistribution } from './fork-distribution.ts'
 import {
   existsSync,
   readFileSync,
@@ -343,7 +344,7 @@ function sameList(left: readonly string[], right: readonly string[]): boolean {
 export function ensureDesktopProfile(home: string = resolveDshHome()): string {
   const dir = resolveProfileDir(DESKTOP_PROFILE_NAME, home)
   if (!existsSync(join(dir, 'package.json'))) {
-    initProfile(dir, REQUIRED_BUNDLES, requiredWebPatchReload())
+    initProfile(dir, [...REQUIRED_BUNDLES, ...(desktopForkDistribution()?.bundledPlugins ?? [])], requiredWebPatchReload())
   }
   const manifest = readProfileManifest(BIN_NAME, dir)
   const rawBundles = (manifest.dsh?.profile as { bundles?: unknown } | undefined)?.bundles

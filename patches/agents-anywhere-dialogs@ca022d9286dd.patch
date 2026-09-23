@@ -1,0 +1,47 @@
+diff --git a/lib/client.js b/lib/client.js
+index e002595..4341d5b 100644
+--- a/lib/client.js
++++ b/lib/client.js
+@@ -1748,6 +1748,14 @@ window.__ModuleLoader__.load({
+ 			settings: "设置",
+ 			logs: "运行日志"
+ 		};
++		/** Count only visible modal surfaces; hidden/non-modal plugin panels never cover AA. */
++		function topVisibleModalDialog(fallback) {
++			return Array.from(document.querySelectorAll('[role="dialog"][aria-modal="true"], [role="alertdialog"][aria-modal="true"]')).filter((element) => {
++				if (!(element instanceof HTMLElement) || element.closest('[hidden], [aria-hidden="true"], [inert]')) return false;
++				const style = window.getComputedStyle(element);
++				return style.display !== "none" && style.visibility !== "hidden" && style.visibility !== "collapse" && element.getClientRects().length > 0;
++			}).at(-1) ?? fallback;
++		}
+ 		function ConnectionEntry({ wide, host }) {
+ 			const [open, setOpen] = (0, react.useState)(false);
+ 			const [tab, setTab] = (0, react.useState)("connection");
+@@ -1762,7 +1770,8 @@ window.__ModuleLoader__.load({
+ 			const trigger = (0, react.useRef)(null);
+ 			const content = (0, react.useRef)(null);
+ 			const close = (0, react.useCallback)(() => {
+-				if (document.querySelectorAll("[role=\"dialog\"]").length > 1) return;
++				const dialog = content.current?.closest("[role=\"dialog\"]");
++				if (dialog && topVisibleModalDialog(dialog) !== dialog) return;
+ 				setOpen(false);
+ 			}, []);
+ 			(0, react.useEffect)(() => {
+@@ -1772,7 +1781,7 @@ window.__ModuleLoader__.load({
+ 				const appRoot = document.getElementById("root");
+ 				const wasInert = appRoot?.hasAttribute("inert") ?? false;
+ 				appRoot?.setAttribute("inert", "");
+-				const activeDialog = () => Array.from(document.querySelectorAll("[role=\"dialog\"]")).at(-1) ?? dialog;
++				const activeDialog = () => topVisibleModalDialog(dialog);
+ 				const focusable = () => Array.from(activeDialog().querySelectorAll("button:not(:disabled), a[href], input:not(:disabled), summary, [tabindex=\"0\"]")).filter((element) => {
+ 					const collapsed = element.closest("details:not([open])");
+ 					return element.tabIndex >= 0 && !element.closest("[hidden], [inert]") && (!collapsed || element === collapsed.querySelector("summary"));
+@@ -1801,7 +1810,7 @@ window.__ModuleLoader__.load({
+ 					dialog.toggleAttribute("inert", covered);
+ 					if (wasCovered && !covered && lastFocus?.isConnected) lastFocus.focus();
+ 				});
+-				observer.observe(document.body, { childList: true });
++				observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden", "aria-hidden", "aria-modal", "style", "class"] });
+ 				document.addEventListener("focusin", onFocus);
+ 				document.addEventListener("keydown", onKeyDown);
+ 				return () => {

@@ -8,6 +8,7 @@
 // runner child alone.
 
 import { startIsolatedDesktopHost } from './host-process.ts'
+import { configureRepositoryLocalData } from './repository-local-data.ts'
 import { app, crashReporter, safeStorage, shell } from 'electron'
 import { randomUUID } from 'node:crypto'
 import { existsSync } from 'node:fs'
@@ -1882,6 +1883,7 @@ async function start(): Promise<void> {
 
 async function run(): Promise<void> {
   app.setName(PRODUCT_NAME)
+  configureRepositoryLocalData(app, process.execPath, process.env)
   if (process.argv.includes('--export-diagnostics')) {
     try {
       await app.whenReady()

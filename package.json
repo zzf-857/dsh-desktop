@@ -1171,6 +1171,9 @@
     }
   },
   "scripts": {
+    "provider:cpa:sync": "node scripts/sync-cpa-reasoning.mjs",
+    "test:cpa-reasoning": "node --test scripts/cpa-reasoning.test.mjs",
+    "package:local": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/package-local-windows.ps1",
     "build": "yarn workspace dsh-community-market build && yarn workspace dsh-plugin-desktop build && yarn workspace dsh-plugin-desktop-beta build && yarn workspace dsh-desktop-next build",
     "typecheck": "yarn workspace dsh-plugin-desktop typecheck && yarn workspace dsh-plugin-desktop-beta typecheck && yarn workspace dsh-community-market typecheck && yarn workspace dsh-desktop-next typecheck",
     "test": "yarn workspace dsh-plugin-desktop test && yarn workspace dsh-plugin-desktop-beta test && yarn workspace dsh-community-market test && yarn workspace dsh-desktop-next test",
@@ -1214,6 +1217,7 @@
     "package:dir:next": "yarn aa:prepare-release && yarn workspace dsh-community-market build && yarn workspace dsh-desktop-next package:dir",
     "dist:mac:next": "yarn aa:prepare-release && yarn workspace dsh-community-market build && yarn workspace dsh-desktop-next dist:mac",
     "dist:mac-smoke:next": "yarn aa:prepare-release && yarn workspace dsh-community-market build && yarn workspace dsh-desktop-next dist:mac-smoke",
-    "dist:win:next": "yarn aa:prepare-release && yarn aa:prepare-release --verify-release && yarn workspace dsh-community-market build && yarn workspace dsh-desktop-next dist:win"
+    "dist:win:next": "yarn aa:prepare-release && yarn aa:prepare-release --verify-release && yarn workspace dsh-community-market build && yarn workspace dsh-desktop-next dist:win",
+    "dist:win:fork": "node scripts/package-fork-windows.mjs"
   }
 }

@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { DesktopShellSpec } from '../src/runtime.ts'
 import { desktopTrayLabel } from '../src/tray-locale.ts'
 import { DESKTOP_FRAME_HEIGHT } from '../src/window-chrome.ts'
+import { DESKTOP_WORKSPACE_FOLDER_CHANNEL } from '../src/workspace-folder-bridge-contract.ts'
 
 const terminal = vi.hoisted(() => ({ open: vi.fn() }))
 const diagnostics = vi.hoisted(() => ({ export: vi.fn() }))
@@ -399,6 +400,41 @@ describe('Electron desktop runtime', () => {
     vi.restoreAllMocks()
   })
 
+  it('opens folders only for the active same-origin main frame and removes its IPC handler on release', async () => {
+    const { ElectronDesktopRuntime } = await import('../src/electron-runtime.ts')
+    const runtime = new ElectronDesktopRuntime(async () => {})
+    const release = runtime.schedule(spec)
+    await runtime.mountScheduled()
+    const registration = (electron.webContents.ipc.handle.mock.calls as unknown as [string, (event: unknown, path: unknown) => Promise<void>][])
+      .find(([channel]) => channel === DESKTOP_WORKSPACE_FOLDER_CHANNEL)
+    expect(registration).toBeDefined()
+    const handler = registration![1]
+    const originalFrameUrl = electron.webContents.mainFrame.url
+    electron.webContents.mainFrame.url = spec.url
+    const event = { sender: electron.webContents, senderFrame: electron.webContents.mainFrame }
+    try {
+      await handler(event, import.meta.dirname)
+      expect(electron.shell.openPath).toHaveBeenCalledWith(import.meta.dirname)
+      for (const untrusted of [
+        { ...event, sender: {} },
+        { ...event, senderFrame: null },
+        { ...event, senderFrame: { url: event.senderFrame.url } },
+      ]) await expect(handler(untrusted, import.meta.dirname)).rejects.toThrow('untrusted')
+      const originalUrl = event.senderFrame.url
+      try {
+        event.senderFrame.url = 'https://example.com/'
+        await expect(handler(event, import.meta.dirname)).rejects.toThrow('untrusted')
+      } finally { event.senderFrame.url = originalUrl }
+      await expect(handler(event, 'relative')).rejects.toThrow('invalid')
+      expect(electron.shell.openPath).toHaveBeenCalledTimes(1)
+    } finally {
+      electron.webContents.mainFrame.url = originalFrameUrl
+      await release()
+    }
+    expect(electron.webContents.ipc.removeHandler).toHaveBeenCalledWith(DESKTOP_WORKSPACE_FOLDER_CHANNEL)
+    await expect(handler(event, import.meta.dirname)).rejects.toThrow('untrusted')
+  })
+
   it('uses the independent macOS compatibility frame, Dock icon, and template tray image', async () => {
     vi.spyOn(process, 'platform', 'get').mockReturnValue('darwin')
     electron.app.getPreferredSystemLanguages.mockReturnValue(['zh-Hans-CN', 'en-US'])
@@ -430,7 +466,7 @@ describe('Electron desktop runtime', () => {
     expect(options).not.toHaveProperty('titleBarOverlay')
     expect(electron.contentViews).toHaveLength(2)
     expect(electron.contentViews[1]?.options).toEqual({ webPreferences: {
-      preload: expect.stringMatching(/\/preload\.cjs$/),
+      preload: expect.stringMatching(/[\\/]preload\.cjs$/),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,

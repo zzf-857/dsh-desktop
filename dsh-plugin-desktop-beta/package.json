@@ -145,7 +145,7 @@
     "icons:export": "node ../scripts/export-app-icons.mjs --channel beta"
   },
   "dependencies": {
-    "@agents-anywhere/dsh-bridge-next": "file:../vendor/agents-anywhere/agents-anywhere-dsh-bridge-next-0.1.0-dev.0.desktop.ca022d9286dd0.rc4b2a1d2.tgz",
+    "@agents-anywhere/dsh-bridge-next": "patch:@agents-anywhere/dsh-bridge-next@file%3A../vendor/agents-anywhere/agents-anywhere-dsh-bridge-next-0.1.0-dev.0.desktop.ca022d9286dd0.rc4b2a1d2.tgz%23../vendor/agents-anywhere/agents-anywhere-dsh-bridge-next-0.1.0-dev.0.desktop.ca022d9286dd0.rc4b2a1d2.tgz%3A%3Ahash=f41e7e&locator=dsh-plugin-desktop-beta%2540workspace%253Adsh-plugin-desktop-beta#~/patches/agents-anywhere-dialogs@ca022d9286dd.patch",
     "@deepseek-ai/cordis": "4.0.2",
     "@deepseek-ai/cordis-plugin-group": "1.0.2",
     "@deepseek-ai/cordis-plugin-include": "1.0.7",

@@ -19,7 +19,9 @@ import { parseDesktopClientEnvironment } from './environment.ts'
 import { applyExtendedShell } from './extended-shell.ts'
 import { installDesktopLaunchWorkspaceBridge } from './launch-workspace.ts'
 import { installSidebarFooterStyles } from './sidebar-footer-styles.ts'
+import { applySettingsPanelEnhancement } from './settings-panel/index.tsx'
 import { desktopWindowService, provideDesktopWindow } from './window-service.ts'
+import { applyWorkspaceFolderMenuEnhancement } from './workspace-folder-menu/index.ts'
 
 export { applyAdvancedShell } from './advanced-shell.ts'
 export { applyDesktopSettings } from './desktop-settings.ts'
@@ -127,6 +129,7 @@ export function apply(ctx: ClientContext): void {
     'dsh-plugin-desktop: native window geometry service',
   )
   const desktopSettings = applyDesktopSettings(ctx, environment)
+  applySettingsPanelEnhancement(ctx)
   // Every mode shares the footer seat: upstream's row flex would otherwise let
   // two launchers crush each other, and compatibility mode installs no frame styles.
   ctx.effect(
@@ -145,6 +148,7 @@ export function apply(ctx: ClientContext): void {
   }
   if (environment.mode === 'advanced') applyAdvancedShell(ctx, environment)
   if (environment.mode === 'extended') applyExtendedShell(ctx, environment, desktopSettings)
+  if (environment.mode !== 'compatibility') applyWorkspaceFolderMenuEnhancement(ctx)
   // Scoped rather than module-level on purpose: the shells above provide
   // `layout`, and upstream's `uiWorkspace` injects it. Naming `uiWorkspace` in
   // the module-level inject list would deadlock the two against each other.

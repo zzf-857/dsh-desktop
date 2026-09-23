@@ -3,6 +3,13 @@ import { describe, expect, it, vi } from 'vitest'
 import { packageDirectory, UNSIGNED_DIRECTORY_BUILD_ARGS, unsignedDirectoryBuildEnvironment } from '../scripts/package-dir.mjs'
 
 describe('unsigned directory packaging', () => {
+  it('uses standard Electron unpacking by default so the sample app is cleaned up', () => {
+    const run = vi.fn(() => ({ status: 0 }))
+    packageDirectory({ run: run as unknown as typeof import('node:child_process').spawnSync })
+    const args = (run.mock.calls as unknown as [string, string[]][])[0]?.[1] ?? []
+    expect(args.some(argument => argument.startsWith('--config.electronDist='))).toBe(false)
+  })
+
   it('removes release secrets while preserving ordinary build inputs', () => {
     const environment = unsignedDirectoryBuildEnvironment({
       APPLE_API_KEY: '/tmp/private.p8',

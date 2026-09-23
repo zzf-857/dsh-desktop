@@ -1,3 +1,4 @@
+import { stat } from 'node:fs/promises'
 import {
   app,
   BrowserWindow,
@@ -22,6 +23,8 @@ import {
 } from './launch-workspace-contract.ts'
 import { DESKTOP_RENDERER_ACTION_CHANNEL } from './renderer-actions-contract.ts'
 import { createDesktopRendererActionDispatcher } from './renderer-actions-dispatch.ts'
+import { DESKTOP_WORKSPACE_FOLDER_CHANNEL } from './workspace-folder-bridge-contract.ts'
+import { openDesktopWorkspaceFolder } from './workspace-folder-opener.ts'
 import type { DesktopNotification, DesktopShellSpec } from './runtime.ts'
 import { prepareTrayIcon } from './tray-icons.ts'
 import { desktopWindowOptions } from './window-options.ts'
@@ -333,6 +336,17 @@ export class ElectronShellGeneration {
       }
       await dispatchRendererAction(action)
     })
+    renderer.ipc.handle(DESKTOP_WORKSPACE_FOLDER_CHANNEL, async (event, path: unknown) => {
+      if (this.released || event.sender !== renderer
+        || event.senderFrame === null || event.senderFrame !== renderer.mainFrame
+        || !sameOriginFrame(event.senderFrame.url, origin)) {
+        throw new Error('dsh-plugin-desktop: untrusted Workspace folder sender')
+      }
+      await openDesktopWorkspaceFolder(path, {
+        stat,
+        openPath: target => shell.openPath(target),
+      })
+    })
 
     let stateWriteTimer: ReturnType<typeof setTimeout> | undefined
     const persistWindowState = (): void => {
@@ -583,7 +597,10 @@ export class ElectronShellGeneration {
       renderer.off('did-fail-load', loadFailed)
       renderer.off('did-start-loading', resetSurface)
       renderer.off('did-finish-load', loaded)
-      if (!renderer.isDestroyed()) renderer.ipc.removeHandler(DESKTOP_RENDERER_ACTION_CHANNEL)
+      if (!renderer.isDestroyed()) {
+        renderer.ipc.removeHandler(DESKTOP_RENDERER_ACTION_CHANNEL)
+        renderer.ipc.removeHandler(DESKTOP_WORKSPACE_FOLDER_CHANNEL)
+      }
       if (isolated) {
         chrome.off('before-input-event', handleZoomShortcut)
         chrome.off('render-process-gone', rendererGone)

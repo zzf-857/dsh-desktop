@@ -4,6 +4,8 @@
 
 <h1 align="center">DSH Desktop</h1>
 
+> **Local fork workflow**: the Windows executable lives at `exe/DSH Desktop.exe`. User data, migration backups and legacy companion files live under `.local-data/`. Both directories are ignored by Git; never force-add or upload them. Run `corepack yarn package:local` from the repository root to rebuild, preserve the previous executable and upgrade in place; append `-NoLaunch` to build without launching. See [AGENTS.md](AGENTS.md) for the local rules.
+
 <p align="center">
   <strong>An open-source desktop client for Windows and macOS, built on DeepSeek Harness.</strong>
 </p>
